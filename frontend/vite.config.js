@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/texpos/',
+  base: '/',           // ✅ Vercel serves from root, NOT /texpos/
   server: {
     port: 5173,
     proxy: {

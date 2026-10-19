@@ -1,7 +1,6 @@
 {
   "rewrites": [
-    { "source": "/texpos/(.*)", "destination": "/index.html" },
-    { "source": "/texpos", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
