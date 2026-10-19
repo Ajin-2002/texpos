@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, LogIn, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -25,102 +25,89 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
-      {/* Background blobs */}
-      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '-15%', left: '-10%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 65%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', top: '40%', right: '20%', width: 300, height: 300, background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 65%)', borderRadius: '50%' }} />
-      </div>
-
-      <div className="login-card" style={{ position: 'relative', zIndex: 1 }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 64, height: 64,
-            background: 'var(--primary)',
-            borderRadius: 'var(--radius-lg)', fontSize: 30, marginBottom: 18,
-            boxShadow: 'var(--shadow-primary)',
-          }}>
-            🧵
+      <main className="login-shell">
+        <section className="login-brand-panel" aria-label="TexPOS introduction">
+          <div className="login-brand-lockup">
+            <div className="login-brand-mark">🧵</div>
+            <span>TexPOS</span>
           </div>
-          <h1 style={{
-            fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 800,
-            color: 'var(--primary-dark)',
-            letterSpacing: '-0.5px', marginBottom: 6,
-          }}>
-            TexPOS
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, letterSpacing: '0.5px' }}>
-            Textile Point of Sale System
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} id="login-form">
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              <Mail size={13} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              placeholder="Enter your email"
-              value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-              required
-              autoComplete="email"
-              autoFocus
-            />
+          <div className="login-brand-message">
+            <span className="login-kicker"><Sparkles size={13} /> RETAIL, IN GOOD ORDER</span>
+            <h1>Everything your store needs, in one place.</h1>
+            <p>Manage your products, sales and day-to-day operations with a workspace built for your team.</p>
           </div>
+          <div className="login-brand-foot"><span className="login-brand-dot" /> Textile point of sale</div>
+          <div className="login-brand-decoration login-brand-decoration-one" />
+          <div className="login-brand-decoration login-brand-decoration-two" />
+        </section>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              <Lock size={13} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
-              Password
-            </label>
-            <div className="input-group has-suffix">
-              <input
-                id="password"
-                type={showPass ? 'text' : 'password'}
-                className="form-input"
-                placeholder="Enter your password"
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                required
-                autoComplete="current-password"
-                style={{ paddingLeft: '14px' }}
-              />
-              <button
-                type="button"
-                className="input-suffix"
-                style={{ pointerEvents: 'all', cursor: 'pointer', background: 'none', border: 'none', color: 'var(--text-muted)' }}
-                onClick={() => setShowPass(!showPass)}
-                aria-label={showPass ? 'Hide password' : 'Show password'}
-              >
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+        <section className="login-form-panel">
+          <div className="login-form-content">
+            <div className="login-mobile-brand"><span className="login-brand-mark">🧵</span><strong>TexPOS</strong></div>
+            <div className="login-heading">
+              <span className="login-welcome">WELCOME BACK</span>
+              <h2>Sign in to your account</h2>
+              <p>Enter your work email and password to continue.</p>
             </div>
+            <form onSubmit={handleSubmit} id="login-form">
+              <div className="form-group">
+                <label className="login-label" htmlFor="email">Work email</label>
+                <input
+                  id="email"
+                  type="email"
+                  className="form-input login-input"
+                  placeholder="name@company.com"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                  required
+                  autoComplete="email"
+                  autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <div className="login-password-heading">
+                  <label className="login-label" htmlFor="password">Password</label>
+                  <Lock size={14} />
+                </div>
+                <div className="input-group has-suffix">
+                  <input
+                    id="password"
+                    type={showPass ? 'text' : 'password'}
+                    className="form-input login-input"
+                    placeholder="Enter your password"
+                    value={form.password}
+                    onChange={e => setForm({ ...form, password: e.target.value })}
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="login-password-toggle"
+                    onClick={() => setShowPass(!showPass)}
+                    aria-label={showPass ? 'Hide password' : 'Show password'}
+                  >
+                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary btn-lg login-submit"
+                disabled={isLoading}
+                id="login-submit"
+              >
+                {isLoading
+                  ? <><span className="spinner" style={{ width: 17, height: 17 }} /> Signing in...</>
+                  : <><LogIn size={17} /> Sign In</>
+                }
+              </button>
+            </form>
+            <div className="login-security"><ShieldCheck size={15} /><span>Your account is protected with secure sign-in.</span></div>
           </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary btn-lg"
-            disabled={isLoading}
-            id="login-submit"
-            style={{ justifyContent: 'center', width: '100%', marginTop: 8 }}
-          >
-            {isLoading
-              ? <><span className="spinner" style={{ width: 17, height: 17 }} /> Signing in...</>
-              : <><LogIn size={17} /> Sign In</>
-            }
-          </button>
-        </form>
-
-
-
+          <footer className="login-footer">TexPOS <span>·</span> Retail operations, simplified</footer>
+        </section>
       </div>
     </div>
   );
