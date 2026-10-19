@@ -13,7 +13,6 @@ import Returns from './pages/admin/Returns';
 import Ledger from './pages/admin/Ledger';
 import Reports from './pages/admin/Reports';
 import BillingPortal from './pages/billing/BillingPortal';
-import MobileAdminReview from './pages/admin/MobileAdminReview';
 import useAuthStore from './store/authStore';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -42,7 +41,6 @@ const App = () => {
     />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/mobile-review" element={<MobileAdminReview />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Admin Routes */}
