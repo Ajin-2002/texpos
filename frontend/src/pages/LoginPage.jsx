@@ -28,15 +28,15 @@ const LoginPage = () => {
       <main className="login-shell">
         <section className="login-brand-panel" aria-label="TexPOS introduction">
           <div className="login-brand-lockup">
-            <div className="login-brand-mark">🧵</div>
+
             <span>TexPOS</span>
           </div>
           <div className="login-brand-message">
-            <span className="login-kicker"><Sparkles size={13} /> RETAIL, IN GOOD ORDER</span>
+            <span className="login-kicker"> RETAIL, IN GOOD ORDER</span>
             <h1>Everything your store needs, in one place.</h1>
             <p>Manage your products, sales and day-to-day operations with a workspace built for your team.</p>
           </div>
-          <div className="login-brand-foot"><span className="login-brand-dot" /> Textile point of sale</div>
+          <div className="login-brand-foot">Textile point of sale</div>
           <div className="login-brand-decoration login-brand-decoration-one" />
           <div className="login-brand-decoration login-brand-decoration-two" />
         </section>
