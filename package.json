@@ -1,0 +1,11 @@
+{
+  "name": "texpos",
+  "version": "1.0.0",
+  "description": "TexPOS - Textile Point of Sale System (MERN Stack)",
+  "scripts": {
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "private": true
+}
