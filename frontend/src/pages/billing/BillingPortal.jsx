@@ -209,20 +209,20 @@ const BillingPortal = ({ mobilePreview = false }) => {
           </div>
 
           {/* Category Tabs */}
-          <div className="billing-category-row">
+          <div className="billing-category-row" role="group" aria-label="Filter products by category">
             <button
-              className={`btn btn-sm ${!activeCat ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm billing-category-chip ${!activeCat ? 'btn-primary' : 'btn-secondary'}`}
+              aria-pressed={!activeCat}
               onClick={() => handleCatChange('')}
-              style={{ flexShrink: 0 }}
             >
               All
             </button>
             {categories.map(c => (
               <button
                 key={c._id}
-                className={`btn btn-sm ${activeCat === c._id ? 'btn-primary' : 'btn-secondary'}`}
+                className={`btn btn-sm billing-category-chip ${activeCat === c._id ? 'btn-primary' : 'btn-secondary'}`}
+                aria-pressed={activeCat === c._id}
                 onClick={() => handleCatChange(c._id)}
-                style={{ flexShrink: 0 }}
               >
                 {c.name}
               </button>
@@ -249,7 +249,7 @@ const BillingPortal = ({ mobilePreview = false }) => {
                   return (
                     <div
                       key={p._id}
-                      className={`product-card ${p.stock <= 0 ? 'out-of-stock' : ''}`}
+                      className={`product-card${p.stock <= 0 ? ' out-of-stock' : ''}${inCart ? ' in-cart' : ''}`}
                       onClick={() => p.stock > 0 && handleAddToCart(p)}
                       style={{
                         border: inCart ? '1px solid var(--primary)' : undefined,
@@ -267,7 +267,7 @@ const BillingPortal = ({ mobilePreview = false }) => {
                           {inCart.quantity}
                         </div>
                       )}
-                      <div style={{ marginBottom: 6 }}>
+                      <div className="billing-product-copy" style={{ marginBottom: 6 }}>
                         {p.category && <div style={{ fontSize: 10, color: 'var(--primary-light)', marginBottom: 3, fontWeight: 600 }}>{typeof p.category === 'object' ? p.category.name : ''}</div>}
                         <div className="product-card-name">{p.name}</div>
                         <div className="product-card-sku">{p.sku || p.barcode || ''}</div>
