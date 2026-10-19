@@ -1037,9 +1037,119 @@ ul, ol { list-style: none; }
 
 @media (max-width: 768px) {
   :root { --sidebar-width: 0px; }
+  .app-layout { display: block; min-height: 100dvh; padding-top: 58px; }
+  .sidebar {
+    width: 100%;
+    min-height: 0;
+    height: 0;
+    overflow: visible;
+    position: static;
+    border: 0;
+    box-shadow: none;
+  }
+  .sidebar-logo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 110;
+    width: 100%;
+    height: 58px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #e6ece7;
+    box-shadow: 0 2px 8px rgba(26, 46, 34, 0.04);
+  }
+  .logo-icon { width: 34px; height: 34px; font-size: 16px; }
+  .logo-text { font-size: 17px; line-height: 1.1; }
+  .logo-sub { font-size: 9px; }
+  .sidebar-footer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 112;
+    width: auto;
+    padding: 8px 12px;
+    border: 0;
+  }
+  .user-card { padding: 2px; border: 0; background: transparent; }
+  .user-card > .avatar, .user-card > div { display: none; }
+  .user-card .btn { width: 38px; height: 38px; color: #52695a; }
+  .sidebar-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 105;
+    height: calc(68px + env(safe-area-inset-bottom));
+    padding: 5px 8px env(safe-area-inset-bottom);
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid #e2eae4;
+    box-shadow: 0 -4px 16px rgba(34, 62, 43, 0.07);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .nav-section-label { display: none; }
+  .nav-item {
+    min-width: 68px;
+    width: 68px;
+    height: 58px;
+    margin: 0;
+    padding: 6px 3px;
+    flex: 0 0 68px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 9.5px;
+    line-height: 1.15;
+    color: #6c7e71;
+    white-space: normal;
+    text-align: center;
+  }
+  .nav-item-icon { width: 18px; height: 18px; }
+  .nav-item.active { background: #edf4ef; color: #356044; border-color: #dbe9de; }
+  .nav-item:hover { background: #f1f6f2; }
   .main-area { margin-left: 0; }
+  .page-content { padding: 18px 14px calc(86px + env(safe-area-inset-bottom)); }
+  .page-header { align-items: flex-start; margin-bottom: 18px; }
+  .page-title { font-size: 20px; }
+  .page-subtitle { font-size: 12px; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 14px; }
+  .stat-value { font-size: 21px; }
   .grid-2 { grid-template-columns: 1fr; }
-  .grid-3 { grid-template-columns: 1fr; }
-  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .filters-row { align-items: stretch; gap: 8px; margin-bottom: 14px; }
+  .filters-row > * { max-width: 100%; }
+  .filters-row .form-input, .filters-row .form-select { min-width: 0; width: auto !important; flex: 1 1 135px; }
+  .filters-row .search-bar { min-width: 0 !important; flex: 1 1 100%; }
+  .card { padding: 15px; }
+  .card:has(> .table-wrapper) { padding: 0; }
+  .table-wrapper { max-width: 100%; }
+  .table { min-width: 680px; }
+  .modal-overlay { align-items: flex-end; padding: 8px; }
+  .modal { max-height: calc(100dvh - 16px); border-radius: 18px 18px 12px 12px; }
+  .modal-header { padding: 17px 18px 13px; }
+  .modal-body { padding: 18px; }
+  .modal-footer { padding: 13px 18px 18px; }
+  .grid-2 { grid-template-columns: 1fr; }
   .billing-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 420px) {
+  .page-content { padding-left: 11px; padding-right: 11px; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .filters-row .btn { flex: 1 1 auto; }
+  .sidebar-nav { gap: 1px; padding-left: 5px; padding-right: 5px; }
+  .nav-item { min-width: 64px; width: 64px; flex-basis: 64px; }
 }
