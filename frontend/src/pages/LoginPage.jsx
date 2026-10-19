@@ -108,7 +108,7 @@ const LoginPage = () => {
           </div>
           <footer className="login-footer">TexPOS <span>·</span> Retail operations, simplified</footer>
         </section>
-      </div>
+      </main>
     </div>
   );
 };
