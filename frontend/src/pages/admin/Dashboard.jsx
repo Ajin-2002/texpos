@@ -7,7 +7,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const StatCard = ({ label, value, icon: Icon, gradient, change, changeLabel }) => (
   <div className="stat-card">
@@ -44,9 +44,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const Dashboard = () => {
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const mobileAdmin = location.pathname.startsWith('/mobile-admin');
 
   useEffect(() => {
     transactionAPI.getDashboard()
@@ -67,7 +69,7 @@ const Dashboard = () => {
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Welcome back! Here's what's happening today.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/billing')}>
+        <button className="btn btn-primary" onClick={() => navigate(mobileAdmin ? '/mobile-admin/billing' : '/billing')}>
           <ShoppingBag size={16} />
           New Sale
         </button>
@@ -188,7 +190,7 @@ const Dashboard = () => {
           <button
             className="btn btn-secondary w-full"
             style={{ marginTop: 14, width: '100%', justifyContent: 'center' }}
-            onClick={() => navigate('/admin/products?lowStock=true')}
+            onClick={() => navigate(`${mobileAdmin ? '/mobile-admin' : '/admin'}/products?lowStock=true`)}
           >
             View All Low Stock
           </button>

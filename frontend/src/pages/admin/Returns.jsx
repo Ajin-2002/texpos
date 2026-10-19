@@ -67,7 +67,7 @@ const Returns = () => {
                       <div style={{ fontSize: 13 }}>{r.customerName}</div>
                       {r.customerPhone && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.customerPhone}</div>}
                     </td>
-                    <td style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{r.originalTransaction || '—'}</td>
+                    <td style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{r.originalTransaction?.invoiceNumber || '—'}</td>
                     <td>{r.items?.length} item(s)</td>
                     <td style={{ fontWeight: 700, color: 'var(--danger)' }}>{formatCurrency(r.totalAmount)}</td>
                     <td style={{ maxWidth: 150 }}>

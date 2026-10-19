@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Search, Eye, ArrowLeftRight, ShoppingBag } from 'lucide-react';
 import { formatCurrency, formatDate, paymentLabel } from '../../utils/helpers';
 
-const statusBadge = { completed: 'badge-success', pending: 'badge-warning', cancelled: 'badge-danger', returned: 'badge-info' };
+const statusBadge = { completed: 'badge-success', pending: 'badge-warning', cancelled: 'badge-danger', partially_returned: 'badge-warning', returned: 'badge-info' };
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -89,6 +89,7 @@ const Transactions = () => {
         <select className="form-select" style={{ width: 140 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="">All Status</option>
           <option value="completed">Completed</option>
+          <option value="partially_returned">Partially returned</option>
           <option value="pending">Pending</option>
           <option value="returned">Returned</option>
           <option value="cancelled">Cancelled</option>
@@ -147,7 +148,7 @@ const Transactions = () => {
                         <button className="btn btn-ghost btn-icon" onClick={() => viewTransaction(t._id)} title="View Details">
                           <Eye size={15} />
                         </button>
-                        {t.type === 'sale' && t.status === 'completed' && (
+                        {t.type === 'sale' && ['completed', 'partially_returned'].includes(t.status) && (
                           <button className="btn btn-ghost btn-icon" onClick={() => openReturn(t)} title="Process Return" style={{ color: 'var(--warning)' }}>
                             <ArrowLeftRight size={15} />
                           </button>

@@ -3,6 +3,10 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 
 const BillPrint = ({ transaction }) => {
   const printRef = useRef();
+  const storeName = import.meta.env.VITE_STORE_NAME || 'TexPOS';
+  const storeAddress = import.meta.env.VITE_STORE_ADDRESS;
+  const storePhone = import.meta.env.VITE_STORE_PHONE;
+  const storeGst = import.meta.env.VITE_STORE_GST;
 
   if (!transaction) return null;
 
@@ -41,12 +45,12 @@ const BillPrint = ({ transaction }) => {
         <div ref={printRef}>
           {/* Header */}
           <div className="bill-header" style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: 10, marginBottom: 10 }}>
-            <div className="bill-title" style={{ fontSize: 20, fontWeight: 'bold' }}>🧵 TexPOS</div>
-            <div className="bill-sub" style={{ fontSize: 11 }}>Textile & Retail Store</div>
-            <div style={{ marginTop: 6, fontSize: 11 }}>
-              <div>📞 +91 98765 43210</div>
-              <div>GST: 29XXXXXX1234Z5</div>
-            </div>
+            <div className="bill-title" style={{ fontSize: 20, fontWeight: 'bold' }}>🧵 {storeName}</div>
+            {storeAddress && <div className="bill-sub" style={{ fontSize: 11 }}>{storeAddress}</div>}
+            {(storePhone || storeGst) && <div style={{ marginTop: 6, fontSize: 11 }}>
+              {storePhone && <div>📞 {storePhone}</div>}
+              {storeGst && <div>GST: {storeGst}</div>}
+            </div>}
           </div>
 
           {/* Invoice Info */}

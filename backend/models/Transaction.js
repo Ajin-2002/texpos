@@ -29,12 +29,14 @@ const transactionSchema = new mongoose.Schema({
   amountPaid: { type: Number, default: 0 },
   changeAmount: { type: Number, default: 0 },
   paymentMethod: { type: String, enum: ['cash', 'card', 'upi', 'mixed', 'credit'], default: 'cash' },
+  paymentConfirmed: { type: Boolean, default: false },
+  paymentReference: { type: String, default: '' },
   paymentDetails: {
     cash: { type: Number, default: 0 },
     card: { type: Number, default: 0 },
     upi: { type: Number, default: 0 },
   },
-  status: { type: String, enum: ['completed', 'pending', 'cancelled', 'returned'], default: 'completed' },
+  status: { type: String, enum: ['completed', 'pending', 'cancelled', 'partially_returned', 'returned'], default: 'completed' },
   notes: { type: String },
   originalTransaction: { type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }, // for returns
   returnReason: { type: String },

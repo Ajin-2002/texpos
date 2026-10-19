@@ -5,6 +5,7 @@ import Modal from '../../components/common/Modal';
 import { PageLoader } from '../../components/common/Spinner';
 import toast from 'react-hot-toast';
 import { Plus, Search, Edit2, Trash2, Package, Filter, RefreshCw, TrendingDown } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 const UNITS = ['pcs', 'meter', 'kg', 'liter', 'yard', 'roll'];
 const EMPTY_FORM = { name: '', sku: '', barcode: '', category: '', supplier: '', description: '', costPrice: '', sellingPrice: '', discountPercent: 0, taxPercent: 0, stock: 0, minStock: 5, unit: 'pcs', fabric: '', color: '', size: '', isActive: true };
@@ -103,13 +104,14 @@ const ProductForm = ({ form, setForm, categories, suppliers, onSubmit, loading, 
 );
 
 const Products = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
-  const [filterLowStock, setFilterLowStock] = useState(false);
+  const [filterLowStock, setFilterLowStock] = useState(() => searchParams.get('lowStock') === 'true');
   const [modal, setModal] = useState({ open: false, type: null, product: null });
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);

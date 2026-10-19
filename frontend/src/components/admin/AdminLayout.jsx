@@ -4,12 +4,12 @@ import AdminSidebar from './AdminSidebar';
 import useAuthStore from '../../store/authStore';
 import { Toaster } from 'react-hot-toast';
 
-const AdminLayout = () => {
+const AdminLayout = ({ mobilePreview = false }) => {
   const { user } = useAuthStore();
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout${mobilePreview ? ' mobile-layout-preview' : ''}`}>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -18,7 +18,7 @@ const AdminLayout = () => {
           error: { iconTheme: { primary: '#d9534f', secondary: 'white' } },
         }}
       />
-      <AdminSidebar />
+      <AdminSidebar mobilePreview={mobilePreview} />
       <main className="main-area">
         <div className="page-content">
           <Outlet />

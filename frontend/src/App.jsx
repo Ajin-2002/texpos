@@ -13,6 +13,7 @@ import Returns from './pages/admin/Returns';
 import Ledger from './pages/admin/Ledger';
 import Reports from './pages/admin/Reports';
 import BillingPortal from './pages/billing/BillingPortal';
+import MobileAdminDemo from './pages/admin/MobileAdminDemo';
 import useAuthStore from './store/authStore';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -41,11 +42,26 @@ const App = () => {
     />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/mobile-admin-demo" element={<MobileAdminDemo />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+      <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="products" element={<Products />} />
+        <Route path="categories" element={<Categories />} />
+        <Route path="staff" element={<ProtectedRoute adminOnly><Staff /></ProtectedRoute>} />
+        <Route path="suppliers" element={<Suppliers />} />
+        <Route path="transactions" element={<Transactions />} />
+        <Route path="returns" element={<Returns />} />
+        <Route path="ledger" element={<ProtectedRoute adminOnly><Ledger /></ProtectedRoute>} />
+        <Route path="reports" element={<ProtectedRoute adminOnly><Reports /></ProtectedRoute>} />
+      </Route>
+
+      {/* Dedicated phone-width review route, using the same admin pages and actions */}
+      <Route path="/mobile-admin" element={<ProtectedRoute adminOnly><AdminLayout mobilePreview /></ProtectedRoute>}>
+        <Route index element={<Navigate to="/mobile-admin/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="products" element={<Products />} />
         <Route path="categories" element={<Categories />} />
@@ -59,6 +75,7 @@ const App = () => {
 
       {/* Billing Portal */}
       <Route path="/billing" element={<ProtectedRoute><BillingPortal /></ProtectedRoute>} />
+      <Route path="/mobile-admin/billing" element={<ProtectedRoute adminOnly><BillingPortal mobilePreview /></ProtectedRoute>} />
 
       {/* 404 */}
       <Route path="*" element={<Navigate to="/login" replace />} />

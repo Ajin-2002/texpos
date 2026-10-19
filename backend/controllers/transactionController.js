@@ -2,103 +2,115 @@ const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
 const Customer = require('../models/Customer');
 const Ledger = require('../models/Ledger');
+const mongoose = require('mongoose');
+
+const httpError = (status, message) => Object.assign(new Error(message), { status });
 
 // Generate invoice number
-const generateInvoiceNumber = async () => {
+const generateInvoiceNumber = async (session) => {
   const date = new Date();
   const prefix = `INV-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-  const lastInvoice = await Transaction.findOne({ invoiceNumber: { $regex: `^${prefix}` } }).sort({ createdAt: -1 });
+  const lastInvoice = await Transaction.findOne({ invoiceNumber: { $regex: `^${prefix}` } })
+    .sort({ createdAt: -1 })
+    .session(session || null);
   const seq = lastInvoice ? parseInt(lastInvoice.invoiceNumber.split('-').pop()) + 1 : 1;
   return `${prefix}-${String(seq).padStart(4, '0')}`;
 };
 
 // @desc Create sale transaction
 const createTransaction = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const { items, customer, customerName, customerPhone, paymentMethod, paymentDetails, amountPaid, notes, discountAmount = 0 } = req.body;
-
-    // Validate and process items
-    let subtotal = 0;
-    let taxAmount = 0;
-    const processedItems = [];
-
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (!product) return res.status(404).json({ success: false, message: `Product not found: ${item.product}` });
-      if (product.stock < item.quantity) return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}` });
-
-      const discountedPrice = item.unitPrice * (1 - (item.discountPercent || product.discountPercent) / 100);
-      const itemTax = discountedPrice * item.quantity * ((item.taxPercent || product.taxPercent) / 100);
-      const itemTotal = discountedPrice * item.quantity + itemTax;
-
-      subtotal += discountedPrice * item.quantity;
-      taxAmount += itemTax;
-
-      processedItems.push({
-        product: product._id,
-        productName: product.name,
-        sku: product.sku,
-        quantity: item.quantity,
-        unit: product.unit,
-        unitPrice: item.unitPrice,
-        discountPercent: item.discountPercent || product.discountPercent,
-        taxPercent: item.taxPercent || product.taxPercent,
-        taxAmount: itemTax,
-        total: itemTotal,
-      });
-
-      // Deduct stock
-      product.stock -= item.quantity;
-      await product.save();
+    const {
+      items, customer, customerName, customerPhone, paymentMethod,
+      amountPaid, notes, discountAmount = 0, paymentConfirmed, paymentReference,
+    } = req.body;
+    if (!Array.isArray(items) || items.length === 0) throw httpError(400, 'Add at least one product');
+    if (!['cash', 'card', 'upi'].includes(paymentMethod)) throw httpError(400, 'Invalid payment method');
+    const orderDiscount = Number(discountAmount);
+    if (!Number.isFinite(orderDiscount) || orderDiscount < 0) throw httpError(400, 'Invalid discount amount');
+    if (orderDiscount > 0 && req.user.role !== 'admin') throw httpError(403, 'Only an admin can apply an order discount');
+    if (paymentMethod !== 'cash' && (!paymentConfirmed || !String(paymentReference || '').trim())) {
+      throw httpError(400, 'Confirm the external payment and enter its receipt reference');
     }
 
-    const totalAmount = subtotal + taxAmount - discountAmount;
-    const changeAmount = amountPaid - totalAmount;
-    const invoiceNumber = await generateInvoiceNumber();
+    let transaction;
+    await session.withTransaction(async () => {
+      let subtotal = 0;
+      let taxAmount = 0;
+      const processedItems = [];
 
-    // Update customer if provided
-    let customerId = null;
-    if (customer) {
-      customerId = customer;
-      await Customer.findByIdAndUpdate(customer, { $inc: { totalPurchases: totalAmount, loyaltyPoints: Math.floor(totalAmount / 100) } });
-    }
+      for (const item of items) {
+        const quantity = Number(item.quantity);
+        if (!mongoose.isValidObjectId(item.product) || !Number.isFinite(quantity) || quantity <= 0) {
+          throw httpError(400, 'Each item needs a valid product and positive quantity');
+        }
+        const product = await Product.findOneAndUpdate(
+          { _id: item.product, isActive: true, stock: { $gte: quantity } },
+          { $inc: { stock: -quantity } },
+          { new: true, session }
+        );
+        if (!product) {
+          const exists = await Product.exists({ _id: item.product }).session(session);
+          if (!exists) throw httpError(404, 'A selected product no longer exists');
+          throw httpError(400, 'A selected product is inactive or has insufficient stock');
+        }
 
-    const transaction = await Transaction.create({
-      invoiceNumber,
-      type: 'sale',
-      customer: customerId,
-      customerName: customerName || 'Walk-in Customer',
-      customerPhone,
-      staff: req.user._id,
-      staffName: req.user.name,
-      items: processedItems,
-      subtotal,
-      discountAmount,
-      taxAmount,
-      totalAmount,
-      amountPaid,
-      changeAmount: Math.max(0, changeAmount),
-      paymentMethod,
-      paymentDetails: paymentDetails || {},
-      notes,
-      status: 'completed',
-    });
+        const discountPercent = Number(product.discountPercent || 0);
+        const taxPercent = Number(product.taxPercent || 0);
+        if (discountPercent < 0 || discountPercent > 100 || taxPercent < 0) throw httpError(400, `Invalid pricing setup for ${product.name}`);
+        const unitPrice = Number(product.sellingPrice);
+        const discountedPrice = unitPrice * (1 - discountPercent / 100);
+        const itemTax = discountedPrice * quantity * taxPercent / 100;
+        const itemTotal = discountedPrice * quantity + itemTax;
+        subtotal += discountedPrice * quantity;
+        taxAmount += itemTax;
+        processedItems.push({
+          product: product._id, productName: product.name, sku: product.sku,
+          quantity, unit: product.unit, unitPrice, discountPercent, taxPercent,
+          taxAmount: itemTax, total: itemTotal,
+        });
+      }
 
-    // Create ledger entry
-    await Ledger.create({
-      type: 'sale',
-      description: `Sale Invoice ${invoiceNumber}`,
-      amount: totalAmount,
-      credit: totalAmount,
-      reference: transaction._id,
-      referenceModel: 'Transaction',
-      referenceNumber: invoiceNumber,
-      createdBy: req.user._id,
+      if (orderDiscount > subtotal + taxAmount) throw httpError(400, 'Discount cannot exceed the sale total');
+      const totalAmount = Math.round((subtotal + taxAmount - orderDiscount) * 100) / 100;
+      const received = paymentMethod === 'cash' ? Number(amountPaid) : totalAmount;
+      if (!Number.isFinite(received) || received < totalAmount) throw httpError(400, 'Payment received is less than the total due');
+      const invoiceNumber = await generateInvoiceNumber(session);
+      if (customer) {
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+          customer,
+          { $inc: { totalPurchases: totalAmount, loyaltyPoints: Math.floor(totalAmount / 100) } },
+          { session }
+        );
+        if (!updatedCustomer) throw httpError(400, 'Selected customer was not found');
+      }
+
+      [transaction] = await Transaction.create([{
+        invoiceNumber, type: 'sale', customer: customer || null,
+        customerName: customerName || 'Walk-in Customer', customerPhone,
+        staff: req.user._id, staffName: req.user.name, items: processedItems,
+        subtotal, discountAmount: orderDiscount, taxAmount, totalAmount,
+        amountPaid: received, changeAmount: Math.max(0, received - totalAmount),
+        paymentMethod,
+        paymentDetails: { cash: paymentMethod === 'cash' ? received : 0, card: paymentMethod === 'card' ? totalAmount : 0, upi: paymentMethod === 'upi' ? totalAmount : 0 },
+        paymentConfirmed: paymentMethod === 'cash' || Boolean(paymentConfirmed),
+        paymentReference: paymentMethod === 'cash' ? '' : String(paymentReference).trim(),
+        notes, status: 'completed',
+      }], { session });
+
+      await Ledger.create([{
+        type: 'sale', description: `Sale Invoice ${invoiceNumber}`, amount: totalAmount,
+        credit: totalAmount, reference: transaction._id, referenceModel: 'Transaction',
+        referenceNumber: invoiceNumber, createdBy: req.user._id,
+      }], { session });
     });
 
     await transaction.populate('staff', 'name email');
     res.status(201).json({ success: true, data: transaction });
-  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+  } catch (error) {
+    res.status(error.status || 500).json({ success: false, message: error.message });
+  } finally { await session.endSession(); }
 };
 
 // @desc Get all transactions
@@ -122,6 +134,7 @@ const getTransactions = async (req, res) => {
     const transactions = await Transaction.find(query)
       .populate('staff', 'name')
       .populate('customer', 'name phone')
+      .populate('originalTransaction', 'invoiceNumber')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
@@ -143,64 +156,87 @@ const getTransaction = async (req, res) => {
 
 // @desc Process return
 const processReturn = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const { originalTransactionId, items, returnReason } = req.body;
-    const original = await Transaction.findById(originalTransactionId);
-    if (!original) return res.status(404).json({ success: false, message: 'Original transaction not found' });
-
-    let subtotal = 0;
-    const processedItems = [];
-
-    for (const item of items) {
-      const origItem = original.items.find(i => i.product.toString() === item.product);
-      if (!origItem) return res.status(400).json({ success: false, message: 'Item not in original transaction' });
-      if (item.quantity > origItem.quantity) return res.status(400).json({ success: false, message: 'Return quantity exceeds sold quantity' });
-
-      const itemTotal = (origItem.total / origItem.quantity) * item.quantity;
-      subtotal += itemTotal;
-      processedItems.push({ ...origItem.toObject(), quantity: item.quantity, total: itemTotal });
-
-      // Restore stock
-      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+    if (!mongoose.isValidObjectId(originalTransactionId) || !Array.isArray(items) || !items.length) {
+      throw httpError(400, 'Select a valid sale and at least one item to return');
     }
+    let returnTransaction;
+    await session.withTransaction(async () => {
+      const original = await Transaction.findById(originalTransactionId).session(session);
+      if (!original) throw httpError(404, 'Original transaction not found');
+      if (original.type !== 'sale' || !['completed', 'partially_returned'].includes(original.status)) {
+        throw httpError(400, 'This sale is not eligible for another return');
+      }
+      const priorReturns = await Transaction.find({ originalTransaction: original._id, type: 'return' }).session(session);
+      const returnedByProduct = new Map();
+      priorReturns.forEach((record) => record.items.forEach((item) => {
+        const key = String(item.product);
+        returnedByProduct.set(key, (returnedByProduct.get(key) || 0) + Number(item.quantity));
+      }));
 
-    const invoiceNumber = await generateInvoiceNumber();
-    const returnTransaction = await Transaction.create({
-      invoiceNumber,
-      type: 'return',
-      customer: original.customer,
-      customerName: original.customerName,
-      customerPhone: original.customerPhone,
-      staff: req.user._id,
-      staffName: req.user.name,
-      items: processedItems,
-      subtotal,
-      totalAmount: subtotal,
-      amountPaid: subtotal,
-      paymentMethod: original.paymentMethod,
-      status: 'completed',
-      originalTransaction: originalTransactionId,
-      returnReason,
-    });
+      const requested = new Map();
+      for (const item of items) {
+        const productId = String(item.product || '');
+        const quantity = Number(item.quantity);
+        if (!mongoose.isValidObjectId(productId) || !Number.isFinite(quantity) || quantity <= 0 || requested.has(productId)) {
+          throw httpError(400, 'Return items must have unique products and positive quantities');
+        }
+        requested.set(productId, quantity);
+      }
 
-    // Update original transaction status
-    original.status = 'returned';
-    await original.save();
+      let subtotal = 0;
+      let discountAmount = 0;
+      const processedItems = [];
+      const originalGross = original.items.reduce((sum, item) => sum + Number(item.total || 0), 0);
+      for (const [productId, quantity] of requested) {
+        const origItem = original.items.find((item) => String(item.product) === productId);
+        if (!origItem) throw httpError(400, 'Item not in original transaction');
+        const remaining = Number(origItem.quantity) - (returnedByProduct.get(productId) || 0);
+        if (quantity > remaining) throw httpError(400, `Only ${remaining} of this item remain eligible for return`);
+        const ratio = quantity / Number(origItem.quantity);
+        const itemTotal = Math.round(Number(origItem.total) * ratio * 100) / 100;
+        subtotal += itemTotal;
+        if (originalGross > 0) discountAmount += Number(original.discountAmount || 0) * (itemTotal / originalGross);
+        processedItems.push({
+          ...origItem.toObject(), quantity, total: itemTotal,
+          taxAmount: Math.round(Number(origItem.taxAmount || 0) * ratio * 100) / 100,
+        });
+        const restored = await Product.findByIdAndUpdate(productId, { $inc: { stock: quantity } }, { session });
+        if (!restored) throw httpError(409, 'A returned product no longer exists; restore inventory before completing this return');
+      }
 
-    // Create ledger entry
-    await Ledger.create({
-      type: 'return',
-      description: `Return for Invoice ${original.invoiceNumber}`,
-      amount: subtotal,
-      debit: subtotal,
-      reference: returnTransaction._id,
-      referenceModel: 'Transaction',
-      referenceNumber: invoiceNumber,
-      createdBy: req.user._id,
+      subtotal = Math.round(subtotal * 100) / 100;
+      discountAmount = Math.round(discountAmount * 100) / 100;
+      const refundAmount = Math.max(0, Math.round((subtotal - discountAmount) * 100) / 100);
+      const invoiceNumber = await generateInvoiceNumber(session);
+      [returnTransaction] = await Transaction.create([{
+        invoiceNumber, type: 'return', customer: original.customer,
+        customerName: original.customerName, customerPhone: original.customerPhone,
+        staff: req.user._id, staffName: req.user.name, items: processedItems,
+        subtotal, discountAmount, totalAmount: refundAmount, amountPaid: refundAmount,
+        paymentMethod: original.paymentMethod, status: 'completed',
+        originalTransaction: original._id, returnReason,
+      }], { session });
+
+      const nowReturned = new Map(returnedByProduct);
+      requested.forEach((quantity, productId) => nowReturned.set(productId, (nowReturned.get(productId) || 0) + quantity));
+      const allReturned = original.items.every((item) => (nowReturned.get(String(item.product)) || 0) >= Number(item.quantity));
+      original.status = allReturned ? 'returned' : 'partially_returned';
+      await original.save({ session });
+
+      await Ledger.create([{
+        type: 'return', description: `Return for Invoice ${original.invoiceNumber}`,
+        amount: refundAmount, debit: refundAmount, reference: returnTransaction._id,
+        referenceModel: 'Transaction', referenceNumber: invoiceNumber, createdBy: req.user._id,
+      }], { session });
     });
 
     res.status(201).json({ success: true, data: returnTransaction });
-  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+  } catch (error) {
+    res.status(error.status || 500).json({ success: false, message: error.message });
+  } finally { await session.endSession(); }
 };
 
 // @desc Get dashboard stats

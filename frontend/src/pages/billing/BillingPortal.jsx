@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const BillingPortal = () => {
+const BillingPortal = ({ mobilePreview = false }) => {
   const { user, logout, isAdmin } = useAuthStore();
   const navigate = useNavigate();
   const cart = useCartStore();
@@ -35,6 +35,8 @@ const BillingPortal = () => {
   const [payMethod, setPayMethod] = useState('cash');
   const [amountPaid, setAmountPaid] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [paymentReference, setPaymentReference] = useState('');
   const [discountInput, setDiscountInput] = useState('');
 
   // Bill Print
@@ -116,6 +118,8 @@ const BillingPortal = () => {
   const openPayment = () => {
     if (!cart.items.length) return toast.error('Cart is empty');
     setAmountPaid('');
+    setPaymentConfirmed(false);
+    setPaymentReference('');
     setPayModal(true);
   };
 
@@ -123,6 +127,7 @@ const BillingPortal = () => {
     const total = cart.getTotal();
     const paid = parseFloat(amountPaid) || 0;
     if (payMethod === 'cash' && paid < total) return toast.error(`Insufficient amount. Need ₹${total.toFixed(2)}`);
+    if (payMethod !== 'cash' && (!paymentConfirmed || !paymentReference.trim())) return toast.error('Confirm the payment and enter its reference');
 
     setProcessing(true);
     try {
@@ -138,6 +143,8 @@ const BillingPortal = () => {
         customerName: cart.customer?.name || 'Walk-in Customer',
         customerPhone: cart.customer?.phone || '',
         paymentMethod: payMethod,
+        paymentConfirmed,
+        paymentReference: paymentReference.trim(),
         paymentDetails: { cash: payMethod === 'cash' ? paid : 0, card: payMethod === 'card' ? total : 0, upi: payMethod === 'upi' ? total : 0 },
         amountPaid: paid || total,
         discountAmount: cart.discount,
@@ -164,7 +171,7 @@ const BillingPortal = () => {
   const change = parseFloat(amountPaid) - total;
 
   return (
-    <div className="billing-portal">
+    <div className={`billing-portal${mobilePreview ? ' mobile-billing-preview' : ''}`}>
       <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: 'var(--border-bright)', fontSize: '13px' } }} />
 
       {/* Top Bar */}
@@ -175,7 +182,7 @@ const BillingPortal = () => {
             <div className="billing-brand-copy"><span>TexPOS</span><small>Point of sale</small></div>
           </div>
           {isAdmin() && (
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/dashboard')} style={{ fontSize: 12 }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate(mobilePreview ? '/mobile-admin/dashboard' : '/admin/dashboard')} style={{ fontSize: 12 }}>
               <ArrowLeft size={13} /> Admin Panel
             </button>
           )}
@@ -423,7 +430,7 @@ const BillingPortal = () => {
       <Modal isOpen={payModal} onClose={() => setPayModal(false)} title="Process Payment" size="sm"
         footer={<>
           <button className="btn btn-secondary" onClick={() => setPayModal(false)}>Cancel</button>
-          <button className="btn btn-success btn-lg" onClick={processPayment} disabled={processing} style={{ minWidth: 150 }}>
+          <button className="btn btn-success btn-lg" onClick={processPayment} disabled={processing || (payMethod !== 'cash' && (!paymentConfirmed || !paymentReference.trim()))} style={{ minWidth: 150 }}>
             {processing ? <span className="spinner" style={{ width: 16, height: 16 }} /> : <CreditCard size={16} />}
             {processing ? 'Processing...' : `Pay ${formatCurrency(total)}`}
           </button>
@@ -493,8 +500,16 @@ const BillingPortal = () => {
           )}
 
           {payMethod !== 'cash' && (
-            <div style={{ textAlign: 'center', padding: '10px 0', fontSize: 13, color: 'var(--text-muted)' }}>
-              {payMethod === 'upi' ? '📱 Collect UPI payment confirmation' : '💳 Swipe/tap card for ₹' + total.toFixed(2)}
+            <div style={{ padding: '10px 0', fontSize: 13, color: 'var(--text-muted)' }}>
+              <p style={{ margin: '0 0 12px' }}>{payMethod === 'upi' ? 'Complete the UPI payment for ' : 'Take payment on the card terminal for '}{formatCurrency(total)}. Confirm only after the terminal/app shows success.</p>
+              <div className="form-group">
+                <label className="form-label">{payMethod === 'upi' ? 'UPI transaction reference' : 'Card terminal reference'}</label>
+                <input className="form-input" value={paymentReference} onChange={e => setPaymentReference(e.target.value)} placeholder="Enter transaction/reference ID" />
+              </div>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                <input type="checkbox" checked={paymentConfirmed} onChange={e => setPaymentConfirmed(e.target.checked)} />
+                I verified that this payment was successful.
+              </label>
             </div>
           )}
         </div>
