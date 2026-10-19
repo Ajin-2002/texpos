@@ -1028,8 +1028,6 @@ ul, ol { list-style: none; }
 .login-password-toggle:hover { color: #315d40; background: #edf4ef; }
 .login-submit { width: 100%; min-height: 48px; justify-content: center; margin-top: 6px; border-radius: 9px; background: #356c49; box-shadow: 0 5px 13px rgba(53,108,73,0.18); }
 .login-submit:hover:not(:disabled) { background: #2b5b3d; box-shadow: 0 7px 17px rgba(53,108,73,0.22); }
-.login-demo-link { display: block; margin-top: 16px; color: #477653; font-size: 11px; font-weight: 600; text-align: center; text-decoration: underline; text-decoration-color: #cbdccf; text-underline-offset: 3px; }
-.login-demo-link:hover { color: #2e5c3c; text-decoration-color: #6e9c7a; }
 .login-security { display: flex; justify-content: center; align-items: center; gap: 7px; margin-top: 24px; color: #85938a; font-size: 10.5px; }
 .login-security svg { color: #648d70; }
 .login-footer { margin-top: 42px; color: #95a198; font-size: 10px; text-align: center; }
@@ -1405,7 +1403,7 @@ ul, ol { list-style: none; }
 }
 
 /* Unauthenticated, sample-data mobile Admin Portal preview. */
-.mobile-admin-demo {
+.mobile-admin-review {
   --mad-ink: #20382a;
   --mad-muted: #7c8d81;
   --mad-green: #3c704d;
@@ -1549,6 +1547,6 @@ ul, ol { list-style: none; }
 .mad-footer-note { position: static; display: flex; align-items: center; gap: 4px; width: fit-content; margin: 2px auto 4px; padding: 5px 8px; border: 1px solid #f0e7d7; border-radius: 7px; color: #987a48; background: #fcf7ed; font-size: 7px; }
 
 @media (max-width: 430px) {
-  .mobile-admin-demo { border: 0; box-shadow: none; }
+  .mobile-admin-review { border: 0; box-shadow: none; }
   .mad-topbar, .mad-bottom-nav { width: 100%; }
 }

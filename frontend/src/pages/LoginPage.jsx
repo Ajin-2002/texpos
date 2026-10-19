@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, LogIn, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Lock, ShieldCheck } from 'lucide-react';
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -104,7 +104,6 @@ const LoginPage = () => {
                 }
               </button>
             </form>
-            <Link className="login-demo-link" to="/mobile-admin-demo">Preview the mobile portal without signing in</Link>
             <div className="login-security"><ShieldCheck size={15} /><span>Your account is protected with secure sign-in.</span></div>
           </div>
           <footer className="login-footer">TexPOS <span>·</span> Retail operations, simplified</footer>

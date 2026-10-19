@@ -30,7 +30,7 @@ const sales = [
 
 const money = (amount) => `₹${Number(amount).toLocaleString('en-IN')}`;
 
-function MobileAdminDemo() {
+function MobileAdminReview() {
   const [page, setPage] = useState('Dashboard');
   const [moreOpen, setMoreOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -153,7 +153,7 @@ function MobileAdminDemo() {
   const mainNav = ['Dashboard', 'Products', 'Transactions'];
 
   return (
-    <div className="mobile-admin-demo">
+    <div className="mobile-admin-review">
       <header className="mad-topbar"><div className="mad-brand"><span className="mad-brand-mark">🧵</span><span>TexPOS <small>ADMIN</small></span></div><span className="mad-demo-badge">DEMO PREVIEW</span><button className="mad-profile" aria-label="Demo profile"><span>A</span></button></header>
       <main className="mad-content">{pageContent()}</main>
       <nav className="mad-bottom-nav" aria-label="Demo portal navigation">
@@ -167,4 +167,4 @@ function MobileAdminDemo() {
   );
 }
 
-export default MobileAdminDemo;
+export default MobileAdminReview;
