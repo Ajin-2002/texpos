@@ -164,15 +164,15 @@ const BillingPortal = () => {
   const change = parseFloat(amountPaid) - total;
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="billing-portal">
       <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: 'var(--border-bright)', fontSize: '13px' } }} />
 
       {/* Top Bar */}
-      <div style={{ background: 'var(--bg-elevated)', borderBottom: 'var(--border)', padding: '0 20px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      <div className="billing-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, background: 'linear-gradient(135deg, var(--primary), var(--secondary))', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🧵</div>
-            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, background: 'linear-gradient(135deg, var(--primary-light), var(--secondary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TexPOS Billing</span>
+            <div className="billing-brand-mark">🧵</div>
+            <div className="billing-brand-copy"><span>TexPOS</span><small>Point of sale</small></div>
           </div>
           {isAdmin() && (
             <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/dashboard')} style={{ fontSize: 12 }}>
@@ -180,8 +180,8 @@ const BillingPortal = () => {
             </button>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>👤 {user?.name}</span>
+        <div className="billing-user-area">
+          <div className="billing-user"><span className="billing-user-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'S'}</span><span><strong>{user?.name}</strong><small>Staff account</small></span></div>
           <button className="btn btn-ghost btn-icon" onClick={() => { logout(); navigate('/login'); }} title="Logout">
             <LogOut size={15} />
           </button>
@@ -189,11 +189,11 @@ const BillingPortal = () => {
       </div>
 
       {/* Main Billing Layout */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 370px', overflow: 'hidden' }}>
+      <div className="billing-workspace">
         {/* LEFT — Products */}
         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-base)' }}>
           {/* Search + Category Filter */}
-          <div style={{ padding: '12px 16px', borderBottom: 'var(--border)', background: 'var(--bg-elevated)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="billing-search-row">
             <div className="search-bar" style={{ flex: 1, minWidth: 200 }}>
               <Search size={15} color="var(--text-muted)" />
               <input ref={searchRef} placeholder="Search product, SKU, barcode..." value={search} onChange={e => handleSearchChange(e.target.value)} />
@@ -202,7 +202,7 @@ const BillingPortal = () => {
           </div>
 
           {/* Category Tabs */}
-          <div style={{ display: 'flex', gap: 6, padding: '8px 16px', borderBottom: 'var(--border)', overflowX: 'auto', background: 'var(--bg-elevated)', flexShrink: 0 }}>
+          <div className="billing-category-row">
             <button
               className={`btn btn-sm ${!activeCat ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => handleCatChange('')}
@@ -223,7 +223,7 @@ const BillingPortal = () => {
           </div>
 
           {/* Product Grid */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
+          <div className="billing-products-scroll">
             {loadingProducts ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
                 <div className="spinner" style={{ width: 32, height: 32 }} />
@@ -235,7 +235,7 @@ const BillingPortal = () => {
                 <div className="empty-state-subtitle">Try a different search or category</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 10 }}>
+              <div className="billing-product-grid">
                 {products.map(p => {
                   const inCart = cart.items.find(i => i.product === p._id);
                   const finalPrice = p.sellingPrice * (1 - (p.discountPercent || 0) / 100);
@@ -246,7 +246,7 @@ const BillingPortal = () => {
                       onClick={() => p.stock > 0 && handleAddToCart(p)}
                       style={{
                         border: inCart ? '1px solid var(--primary)' : undefined,
-                        background: inCart ? 'rgba(99,102,241,0.08)' : undefined,
+                        background: inCart ? 'var(--primary-bg)' : undefined,
                       }}
                     >
                       {/* Stock badge */}

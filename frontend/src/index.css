@@ -601,6 +601,64 @@ ul, ol { list-style: none; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
 /* ===== Billing Portal ===== */
+.billing-portal {
+  height: 100vh;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+.billing-topbar {
+  min-height: 68px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: #fff;
+  border-bottom: 1px solid #e6ece7;
+  box-shadow: 0 2px 8px rgba(26, 46, 34, 0.035);
+  position: relative;
+  z-index: 5;
+}
+
+.billing-brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #edf4ef;
+  font-size: 19px;
+}
+
+.billing-brand-copy { display: flex; flex-direction: column; line-height: 1.2; }
+.billing-brand-copy span { font-family: var(--font-heading); font-size: 16px; font-weight: 750; color: #254b35; letter-spacing: -0.3px; }
+.billing-brand-copy small { color: #788a7e; font-size: 10px; font-weight: 600; letter-spacing: 0.65px; text-transform: uppercase; margin-top: 3px; }
+.billing-user-area { display: flex; align-items: center; gap: 12px; }
+.billing-user { display: flex; align-items: center; gap: 9px; }
+.billing-user-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #eaf2ec; color: #376348; font-size: 13px; font-weight: 700; }
+.billing-user strong, .billing-user small { display: block; }
+.billing-user strong { color: #263c2e; font-size: 12px; font-weight: 650; }
+.billing-user small { color: #809086; font-size: 10px; margin-top: 1px; }
+
+.billing-workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  overflow: hidden;
+}
+.billing-search-row { padding: 16px 20px 12px; border-bottom: 1px solid #e8eee9; background: #fff; display: flex; gap: 10px; }
+.billing-search-row .search-bar { min-width: 0; padding: 10px 14px; background: #f8faf8; border-color: #e3ebe5; border-radius: 10px; }
+.billing-search-row .search-bar input { font-size: 13px; }
+.billing-category-row { display: flex; gap: 7px; padding: 10px 20px; border-bottom: 1px solid #e8eee9; overflow-x: auto; background: #fff; flex-shrink: 0; }
+.billing-category-row .btn { border-radius: 8px; }
+.billing-products-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 20px; }
+.billing-product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 13px; }
+
 .billing-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -628,6 +686,12 @@ ul, ol { list-style: none; }
   box-shadow: var(--shadow-sm);
 }
 
+.billing-product-grid .product-card { min-height: 154px; padding: 16px; border-color: #e4ebe5; border-radius: 12px; }
+.billing-product-grid .product-card:hover { border-color: #9bb9a3; background: #fff; }
+.billing-product-grid .product-card-name { font-size: 13.5px; min-height: 35px; }
+.billing-product-grid .product-card-price { font-size: 17px; color: #315d40; }
+.billing-product-grid .product-card-stock { color: #74867a; }
+
 .product-card:hover {
   border-color: var(--primary);
   background: var(--bg-surface);
@@ -650,11 +714,12 @@ ul, ol { list-style: none; }
 
 .cart-panel {
   background: var(--bg-elevated);
-  border-left: var(--border);
+  border-left: 1px solid #e2eae4;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  box-shadow: -2px 0 8px rgba(50, 90, 65, 0.06);
+  height: 100%;
+  box-shadow: -4px 0 18px rgba(34, 62, 43, 0.045);
+  min-height: 0;
 }
 
 .cart-header {
@@ -663,9 +728,10 @@ ul, ol { list-style: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--primary);
-  color: white;
+  background: #fff;
+  color: #263c2e;
 }
+.cart-header > div > svg { color: #4f805d !important; }
 
 .cart-items { flex: 1; overflow-y: auto; padding: 12px; background: var(--bg-surface); }
 
@@ -711,6 +777,45 @@ ul, ol { list-style: none; }
   padding: 16px 20px;
   border-top: var(--border);
   background: var(--bg-card);
+}
+
+.cart-panel .cart-item { border-color: #e4ebe5; }
+.cart-panel .cart-summary { padding: 18px 20px 20px; }
+.cart-panel .summary-row.total { border-top: 1px solid #e1e9e3; padding-top: 14px; margin-top: 10px; font-size: 16px; }
+.cart-panel .summary-row.total span:last-child { font-size: 21px; font-family: var(--font-heading); }
+#process-payment-btn { min-height: 48px; border-radius: 10px; background: #36734d; box-shadow: 0 5px 12px rgba(54, 115, 77, 0.16); }
+#process-payment-btn:hover:not(:disabled) { background: #2d6241; }
+
+@media (max-width: 1050px) {
+  .billing-workspace { grid-template-columns: minmax(0, 1fr) 340px; }
+  .billing-product-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .billing-portal { height: auto; min-height: 100vh; overflow: visible; }
+  .billing-topbar { min-height: 62px; padding: 0 14px; }
+  .billing-workspace { display: flex; flex-direction: column; overflow: visible; }
+  .billing-workspace > div:first-child { min-height: 58vh; overflow: visible !important; }
+  .billing-search-row { padding: 12px 14px 10px; }
+  .billing-category-row { padding: 9px 14px; }
+  .billing-products-scroll { overflow: visible; padding: 14px; }
+  .billing-product-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+  .billing-product-grid .product-card { min-height: 145px; }
+  .cart-panel { height: auto; min-height: 440px; border-left: 0; border-top: 1px solid #e2eae4; box-shadow: 0 -4px 18px rgba(34, 62, 43, 0.04); }
+  .cart-items { flex: initial; min-height: 120px; max-height: 34vh; }
+}
+
+@media (max-width: 420px) {
+  .billing-brand-mark { width: 34px; height: 34px; }
+  .billing-user { gap: 6px; }
+  .billing-user-avatar { width: 30px; height: 30px; }
+  .billing-user strong { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .billing-user small { display: none; }
+  .billing-category-row .btn { padding: 6px 10px; }
+  .billing-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .billing-topbar > div:first-child { gap: 8px !important; }
+  .billing-topbar > div:first-child > div:first-child { gap: 6px !important; }
+  .billing-topbar .btn-sm { padding: 6px 8px; font-size: 11px !important; }
 }
 
 .summary-row {
